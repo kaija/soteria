@@ -6,6 +6,7 @@ resolv = new cares.Resolver({
   ]
 });
 
+
 resolv_opt = {
   type: cares.NS_T_A,
   class: cares.NS_C_IN,
@@ -18,12 +19,54 @@ exports.setkey = function (key) {
   accesskey = key;
 };
 
+function ipdata(ans) {
+  var data = {};
+  if (ans[0] != '127') {
+    data.err = 'result data format mismatch.'
+  } else {
+    data.day = ans[1];
+    data.score = ans[2];
+    //more fast by using switch case
+    switch (ans[3]) {
+      case '0':
+        data.type = ['Search Engine'];
+        break;
+      case '1':
+        data.type = ['Suspicious'];
+        break;
+      case '2':
+        data.type = ['Harvester'];
+        break;
+      case '3':
+        data.type = ['Suspicious', 'Harvester'];
+        break;
+      case '4':
+        data.type = ['Comment Spammer'];
+        break;
+      case '5':
+        data.type = ['Suspicious', 'Comment Spammer'];
+        break;
+      case '6':
+        data.type = ['Harvester', 'Comment Spammer'];
+        break;
+      case '7':
+        data.type = ['Suspicious', 'Harvester', 'Comment Spammer'];
+        break;
+      default:
+        data.type = ['Unknown'];
+        break;
+    }
+  }
+  return data;
+}
+
 function ipreputation(ip) {
   var ipb = ip.split(".").reverse().join(".");
   var fqdn = accesskey + "." + ipb + ".dnsbl.httpbl.org";  //console.log(fqdn);
   return new Promise(function (fulfill, reject) {
     lookup(fqdn).then((res) => {
-      fulfill(res);
+      ans = res.answer[0].address.split('.');
+      fulfill(ipdata(ans));
     }).catch((err) => {
       reject(err);
     });

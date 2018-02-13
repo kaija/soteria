@@ -17,4 +17,6 @@ COPY . .
 
 EXPOSE 3000
 
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/src/app/node_modules/cares/build/Release
+
 CMD [ "npm", "start" ]
