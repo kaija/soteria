@@ -1,8 +1,8 @@
 var express = require('express');
 const ipbl = require('./ipbl');
-
+const whois = require('./whois');
 ipbl.setkey('xxxxxxxxxx');
-
+whois.setkey('xxxxxxxxxx');
 
 var router = express.Router();
 /*
