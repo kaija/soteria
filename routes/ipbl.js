@@ -124,11 +124,19 @@ function lookup(fqdn) {
   });
 }
 
+function findip(data) {
+  for ( i in data.answer) {
+    if (data.answer[i].type == 1) {
+      return data.answer[i].address;
+    }
+  }
+}
+
 function fqdnipreputation(fqdn) {
   return new Promise(function (fulfill, reject) {
     lookup(fqdn).then((res) => {
-      ipreputation(res.answer[0].address).then((res) => {
-        fulfill(res);
+      ipreputation(findip(res)).then((data) => {
+        fulfill(data);
       }).catch((err) => {
         reject(err);
       });

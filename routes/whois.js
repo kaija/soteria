@@ -41,10 +41,28 @@ function jwawhois(domain) {
 }
 */
 
+function whoisxmlgetcountry(data) {
+  raw = data.split('\n');
+  for (i in raw){
+    token = raw[i];
+    if (token.startsWith('Registrant Country')) {
+      return token.split(' ').pop();
+    }
+  }
+  return 'Unknown';
+}
+
 function whoisxmlscore(data) {
   var score = {};
+  now = Date.now();
+  reg = Date.parse(data.WhoisRecord.createdDate);
+  daydiff = Math.floor( (now - reg)/86400000 );
+  score.days = daydiff;
+
+  score.country = whoisxmlgetcountry(data.WhoisRecord.registrant.rawText)
   return score;
 }
+
 
 function whoisxml(domain, callback) {
   var url = util.format('https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=%s&outputFormat=JSON&ip=1&domainName=%s', apikey, domain);
@@ -62,12 +80,26 @@ function whoisxml(domain, callback) {
 }
 
 
-
+/*
+function lookup(url, callback) {
+  domain = parsedomain(url);
+  whoisxml(domain, function(err, data) {
+    score = whoisxmlscore(JSON.parse(data));
+    callback(null, score);
+  });
+}
+*/
 function lookup(url) {
   domain = parsedomain(url);
-  console.log(domain);
-  whoisxml(domain, function(err, data) {
-    console.log(data);
+  return new Promise(function (fulfill, reject) {
+    whoisxml(domain, function(err, data) {
+      if(err) {
+        reject(err);
+      } else {
+        score = whoisxmlscore(JSON.parse(data));
+        fulfill(score);
+      }
+    });
   });
 }
 
